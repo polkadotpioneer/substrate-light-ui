@@ -1,3 +1,26 @@
 {
-  "extends": "./node_modules/@polkadot/dev/config/tsconfig"
+  "extends": "./node_modules/@polkadot/dev/config/tsconfig",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "packages/ui-common/src": [
+        "packages/ui-common/src"
+      ],
+      "packages/ui-common/src/*": [
+        "packages/ui-common/src/*"
+      ],
+      "packages/ui-components/src": [
+        "packages/ui-components/src"
+      ],
+      "packages/ui-components/src/*": [
+        "packages/ui-components/src/*"
+      ],
+      "packages/transfer-app/src": [
+        "packages/transfer-app/src"
+      ],
+      "packages/transfer-app/src/*": [
+        "packages/transfer-app/src/*"
+      ],
+    },
+  },
 }
