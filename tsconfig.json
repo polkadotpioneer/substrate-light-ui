@@ -3,22 +3,22 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "packages/ui-common/src": [
+      "@substrate/ui-common": [
         "packages/ui-common/src"
       ],
-      "packages/ui-common/src/*": [
+      "@substrate/ui-common/*": [
         "packages/ui-common/src/*"
       ],
-      "packages/ui-components/src": [
+      "@substrate/ui-components": [
         "packages/ui-components/src"
       ],
-      "packages/ui-components/src/*": [
+      "@substrate/ui-components/*": [
         "packages/ui-components/src/*"
       ],
-      "packages/transfer-app/src": [
+      "@substrate/transfer-app": [
         "packages/transfer-app/src"
       ],
-      "packages/transfer-app/src/*": [
+      "@substrate/transfer-app/*": [
         "packages/transfer-app/src/*"
       ],
     },
