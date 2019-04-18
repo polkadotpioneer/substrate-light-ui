@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "Wrapper to connect React components to PolkadotJS Api",
   "license": "Apache-2.0",
-  "main": "build/index.js",
+  "main": "src/",
   "private": true,
   "repository": "https://github.com/paritytech/substrate-light-ui.git",
   "scripts": {

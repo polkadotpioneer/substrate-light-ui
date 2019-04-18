@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowJs": false,
-    "baseUrl": "node_modules",
     "declaration": false,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,

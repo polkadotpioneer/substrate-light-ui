@@ -4,7 +4,7 @@
   "author": "Parity Technologies <admin@parity.io>",
   "description": "UI components shared across Substrate Light UI",
   "license": "Apache-2.0",
-  "main": "build/index.js",
+  "main": "src/",
   "private": true,
   "repository": "https://github.com/paritytech/substrate-light-ui.git",
   "scripts": {
