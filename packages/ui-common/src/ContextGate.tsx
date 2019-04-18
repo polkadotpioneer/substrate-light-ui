@@ -13,10 +13,12 @@ import { filter, switchMap } from 'rxjs/operators';
 import { Alert, AlertStore, AlertWithoutId, dequeue, enqueue } from './alerts';
 import { AppContext, System } from './AppContext';
 import { isTestChain } from './util';
+import { TxQueueStore } from './txQueueStore';
 
 // Holds the state for all the contexts
 interface State {
   alertStore: AlertStore;
+  txQueueStore: TxQueueStore;
   isReady: boolean;
   system: System;
 }
@@ -68,6 +70,7 @@ export class ContextGate extends React.PureComponent<{}, State> {
 
   state: State = {
     alertStore: this.alertStoreCreate([]),
+    txQueueStore: new TxQueueStore(),
     ...DISCONNECTED_STATE_PROPERTIES
   };
 
@@ -163,14 +166,15 @@ export class ContextGate extends React.PureComponent<{}, State> {
 
   render () {
     const { children } = this.props;
-    const { alertStore, isReady, system } = this.state;
+    const { alertStore, isReady, system, txQueueStore } = this.state;
 
     return <AppContext.Provider value={{
       alertStore,
       api: this.api,
       isReady,
       keyring,
-      system
+      system,
+      txQueueStore
     }}>
       {children}
     </AppContext.Provider>;
