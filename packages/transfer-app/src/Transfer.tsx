@@ -12,7 +12,7 @@ import React from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { SendBalance } from './SendBalance';
-import { SentBalance } from './SentBalance';
+import { TxQueue } from './TxQueue';
 
 interface MatchParams {
   currentAccount: string;
@@ -21,13 +21,12 @@ interface MatchParams {
 interface Props extends RouteComponentProps<MatchParams> { }
 
 export class Transfer extends React.PureComponent<Props> {
-  render () {
+  render() {
     return (
       <Container>
         <Header>Transfer Balance</Header>
 
         <Switch>
-          <Route component={SentBalance} path='/transfer/:currentAccount/sent'></Route>
           <Route exact path='/transfer/:currentAccount/' render={({ match: { params: { currentAccount } } }) => (
             <Subscribe>
               {
@@ -40,15 +39,17 @@ export class Transfer extends React.PureComponent<Props> {
                       ...Object.values(accounts).map(account => account.json.address),
                       ...Object.values(addresses).map(address => address.json.address)]),
                     map(addresses => addresses.filter(address => address !== currentAccount)),
-                    map(([firstDifferentAddress, ...rest]) => {
-                      return <Redirect to={`/transfer/${currentAccount}/${firstDifferentAddress || currentAccount}`} />;
-                    })
+                    map(([firstDifferentAddress, ...rest]) => (
+                      <Redirect to={`/transfer/${currentAccount}/${firstDifferentAddress || currentAccount}`} />
+                    ))
                   )
               }
             </Subscribe>
           )} />
-          <Route component={SendBalance} path='/transfer/:currentAccount/:recipientAddress'></Route>
-          <Route component={SendBalance}></Route>
+          {this.context.txQueueStore.txs.length
+            ? <Route path='/transfer/:currentAccount/:recipientAddress' component={TxQueue} />
+            : <Route path='/transfer/:currentAccount/:recipientAddress' component={SendBalance} />
+          }
         </Switch>
       </Container>
     );

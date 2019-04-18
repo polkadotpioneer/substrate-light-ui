@@ -110,16 +110,20 @@ export class SendBalance extends React.PureComponent<Props, State> {
   }
 
   handleSubmit = () => {
-    const { api } = this.context;
-    const { history, match: { params: { currentAccount, recipientAddress } } } = this.props;
+    const { api, keyring, txQueueStore } = this.context;
+    const { match: { params: { currentAccount, recipientAddress } } } = this.props;
 
     const values = validate({ ...this.state, currentAccount, recipientAddress }, api);
 
     values.fold(
       () => {/* Do nothing if error */ },
       (allExtrinsicData) => {
-        // If everything is correct, then go to sent
-        history.push(`/transfer/${currentAccount}/sent`, allExtrinsicData);
+        // If everything is correct, then submit the extrinsic
+
+        l.log('Sending tx from', currentAccount, 'to', recipientAddress, 'of amount', amount);
+        
+        const senderPair = keyring.getPair(currentAccount);
+        txQueueStore.submit({extrinsic: allExtrinsicData, senderPair});
       });
   }
 
