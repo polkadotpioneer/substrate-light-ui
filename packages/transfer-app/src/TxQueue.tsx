@@ -60,7 +60,10 @@ export class TxQueue extends React.PureComponent<Props, State> {
   render () {
     const { location, match: { params: { currentAccount } } } = this.props;
 
-    // TODO if no pending tx, just go to /send
+    const { txQueueStore } = this.context;
+
+    // will be redirected to /transfer from the parent component
+    if (!txQueueStore.txs.length) return;
 
     const { showDetails, txResult } = this.state;
 
@@ -92,7 +95,7 @@ export class TxQueue extends React.PureComponent<Props, State> {
   renderDetails () {
     const { location, match: { params: { currentAccount } } } = this.props;
 
-    const { allFees, allTotal, amount, recipientAddress } = location.state;
+    const { allFees, allTotal, amount, recipientAddress } = this.context.txQueueStore.txs[0].extrinsic;
 
     return (
       <Segment placeholder>

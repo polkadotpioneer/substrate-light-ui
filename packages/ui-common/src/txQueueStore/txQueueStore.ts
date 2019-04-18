@@ -18,7 +18,7 @@ export interface PendingTransaction {
 } // partial? no, but with "?" keys
 
 interface SubmitParams {
-  extrinsic: SubmittableExtrinsic<RxResult, RxResult>,
+  extrinsic: AllExtrinsicData,
   senderPair: KeyringPair
 }
 

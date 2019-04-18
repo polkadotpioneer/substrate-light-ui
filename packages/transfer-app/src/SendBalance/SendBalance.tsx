@@ -16,6 +16,7 @@ import { SubResults } from './types';
 import { MatchParams } from '../types';
 import { validate } from './validate';
 import { Validation } from './Validation';
+import { logger } from '@polkadot/util';
 
 interface SendMatchParams extends MatchParams {
   recipientAddress?: string;
@@ -26,6 +27,8 @@ interface Props extends RouteComponentProps<SendMatchParams> { }
 interface State extends Partial<SubResults> {
   amountAsString: string;
 }
+
+const l = logger('transfer-app');
 
 export class SendBalance extends React.PureComponent<Props, State> {
   static contextType = AppContext;
