@@ -5,21 +5,28 @@
 import { SubmittableExtrinsic, SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { RxResult } from '@polkadot/api/rx/types';
+import BN from 'bn.js';
+import { Balance } from '@polkadot/types';
 
-export interface PendingTransaction {
+export interface PendingTransaction { // aka TxQueueItem
   id: number;
   status: {
-    isFinalized: boolean,
-    isDropped: boolean,
-    isUsurped: boolean,
+    isFinalized: boolean;
+    isDropped: boolean;
+    isUsurped: boolean;
   };
-  // TODO and also the transaction details (de qui à qui, combien)
+  allFees: BN; allTotal: BN; amount: Balance; recipientAddress: string;
   unsubscribe: any; // function
 } // partial? no, but with "?" keys
 
 interface SubmitParams {
-  extrinsic: AllExtrinsicData,
-  senderPair: KeyringPair
+  // todo consolidate with types.ts from SendBalance
+  extrinsic: SubmittableExtrinsic<RxResult, RxResult>;
+  allFees: BN;
+  allTotal: BN;
+  amount: Balance;
+  recipientAddress: string;
+  senderPair: KeyringPair;
 }
 
 export class TxQueueStore {
@@ -29,7 +36,7 @@ export class TxQueueStore {
   counter = 0;
 
   submit (params: SubmitParams) {
-    const {extrinsic, senderPair} = params;
+    const { extrinsic, senderPair, allFees, allTotal, amount, recipientAddress } = params;
 
     const pendingTransactionId = this.counter++;
 
@@ -77,10 +84,11 @@ export class TxQueueStore {
         isDropped: false,
         isUsurped: false,
       },
-      unsubscribe: subscription.unsubscribe
+      unsubscribe: subscription.unsubscribe,
+      allFees, allTotal, amount, recipientAddress
     }
 
-    this.txs = this.txs.concat(newPendingTx);
+    this.txs = this.txs.concat(newPendingTx); // mais comme ça txqueuestore n'est pas modifié TT donc le context ne rerender pas
   }
 
   clear() {

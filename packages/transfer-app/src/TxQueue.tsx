@@ -4,12 +4,11 @@
 
 import { SubmittableResult } from '@polkadot/api/SubmittableExtrinsic';
 import IdentityIcon from '@polkadot/ui-identicon';
-import { logger } from '@polkadot/util';
 import { AppContext } from '@substrate/ui-common';
 import { Icon, Margin, Message, NavButton, NavLink, Segment, Stacked, StackedHorizontal, SubHeader } from '@substrate/ui-components';
 import { Subscription } from 'rxjs';
 import React from 'react';
-import { RouteComponentProps, Redirect } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 
 import { CenterDiv, LeftDiv, RightDiv } from './Transfer.styles';
 import { MatchParams } from './types';
@@ -21,8 +20,6 @@ interface State {
   showDetails: boolean;
   txResult?: SubmittableResult;
 }
-
-const l = logger('transfer-app');
 
 export class TxQueue extends React.PureComponent<Props, State> {
   static contextType = AppContext;
@@ -43,26 +40,19 @@ export class TxQueue extends React.PureComponent<Props, State> {
   }
 
   handleNewTransfer = () => {
-    const { history, match: { params: { currentAccount } } } = this.props;
-    const { txQueue } = this.context;
+    const { txQueueStore } = this.context;
 
     // Transaction was seen by the user, we can remove it
-    txQueue.clear();
-
-    // TODO should we redirect manually? it should be automatic in the render
-    // if we use one and the same component. and not routes.
-    // /transfer/0x00/ et c'est tout
-    // history.push(`/transfer/${currentAccount}`);
+    // Parent component will redirect to SendBalance
+    txQueueStore.clear();
   }
 
   toggleDetails = () => this.setState({ showDetails: !this.state.showDetails });
 
   render () {
-    const { location, match: { params: { currentAccount } } } = this.props;
-
     const { txQueueStore } = this.context;
 
-    // will be redirected to /transfer from the parent component
+    // The parent component will redirect to SendBalance if empty txQueue
     if (!txQueueStore.txs.length) return;
 
     const { showDetails, txResult } = this.state;
@@ -93,9 +83,9 @@ export class TxQueue extends React.PureComponent<Props, State> {
   }
 
   renderDetails () {
-    const { location, match: { params: { currentAccount } } } = this.props;
+    const { match: { params: { currentAccount } } } = this.props;
 
-    const { allFees, allTotal, amount, recipientAddress } = this.context.txQueueStore.txs[0].extrinsic;
+    const { allFees, allTotal, amount, recipientAddress } = this.context.txQueueStore.txs[0];
 
     return (
       <Segment placeholder>
@@ -109,9 +99,9 @@ export class TxQueue extends React.PureComponent<Props, State> {
   }
 
   renderSummary () {
-    const { location, match: { params: { currentAccount } } } = this.props;
+    const { match: { params: { currentAccount } } } = this.props;
 
-    const { amount, recipientAddress } = location.state;
+    const { amount, recipientAddress } = this.context.txQueueStore.txs[0];
 
     return (
       <StackedHorizontal>

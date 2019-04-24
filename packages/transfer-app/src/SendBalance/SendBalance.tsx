@@ -123,10 +123,12 @@ export class SendBalance extends React.PureComponent<Props, State> {
       (allExtrinsicData) => {
         // If everything is correct, then submit the extrinsic
 
+        const {extrinsic, amount, allFees, allTotal} = allExtrinsicData;
+
         l.log('Sending tx from', currentAccount, 'to', recipientAddress, 'of amount', amount);
         
         const senderPair = keyring.getPair(currentAccount);
-        txQueueStore.submit({extrinsic: allExtrinsicData, senderPair});
+        txQueueStore.submit({ extrinsic, amount, allFees, allTotal, senderPair, recipientAddress: recipientAddress as any});
       });
   }
 

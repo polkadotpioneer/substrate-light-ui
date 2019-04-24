@@ -168,6 +168,8 @@ export class ContextGate extends React.PureComponent<{}, State> {
     const { children } = this.props;
     const { alertStore, isReady, system, txQueueStore } = this.state;
 
+    console.log('txqueuestore in contextgate is',txQueueStore);
+
     return <AppContext.Provider value={{
       alertStore,
       api: this.api,
