@@ -7,7 +7,6 @@ import { ChainProperties, Health } from '@polkadot/types';
 import keyring from '@polkadot/ui-keyring';
 import React from 'react';
 
-import { AlertStore } from './alerts';
 import { TxQueueStore } from './txQueueStore';
 
 export interface System {
@@ -19,7 +18,6 @@ export interface System {
 }
 
 export interface AppContextType {
-  alertStore: AlertStore; // UI alerts
   txQueueStore: TxQueueStore; // Submits transactions and stores pending transactions sent from the UI
   api: ApiRx; // From @polkadot/api
   isReady: boolean; // Are api and keyring loaded?

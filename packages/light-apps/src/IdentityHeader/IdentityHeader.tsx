@@ -4,9 +4,9 @@
 
 import FileSaver from 'file-saver';
 import { BlockNumber, Header } from '@polkadot/types';
-import { AppContext } from '@substrate/ui-common';
+import { AppContext, AlertsContext } from '@substrate/ui-common';
 import { Balance, Dropdown, FadedText, Icon, Input, Margin, Menu, Modal, NavLink, Stacked, StackedHorizontal, StyledLinkButton, WithSpaceAround, WithSpaceBetween } from '@substrate/ui-components';
-import React from 'react';
+import React, { useContext } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { Observable, Subscription } from 'rxjs';
 
@@ -165,18 +165,18 @@ export class IdentityHeader extends React.PureComponent<Props, State> {
   }
 
   onError = (value: string) => {
-    const { alertStore } = this.context;
+    const { enqueue } = useContext(AlertsContext); // TODO WON'T WORK
 
-    alertStore.enqueue({
+    enqueue({
       content: value,
       type: 'error'
     });
   }
 
   onSuccess = (value: string) => {
-    const { alertStore } = this.context;
+    const { enqueue } = useContext(AlertsContext); // TODO DON'T WORK
 
-    alertStore.enqueue({
+    enqueue({
       content: value,
       type: 'success'
     });

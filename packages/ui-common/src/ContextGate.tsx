@@ -10,14 +10,13 @@ import React from 'react';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, switchMap } from 'rxjs/operators';
 
-import { Alert, AlertStore, AlertWithoutId, dequeue, enqueue } from './alerts';
 import { AppContext, System } from './AppContext';
 import { isTestChain } from './util';
 import { TxQueueStore } from './txQueueStore';
+import { AlertsContextProvider } from './AlertsContext';
 
 // Holds the state for all the contexts
 interface State {
-  alertStore: AlertStore;
   txQueueStore: TxQueueStore;
   isReady: boolean;
   system: System;
@@ -69,7 +68,6 @@ export class ContextGate extends React.PureComponent<{}, State> {
   api = new ApiRx();
 
   state: State = {
-    alertStore: this.alertStoreCreate([]),
     txQueueStore: new TxQueueStore(),
     ...DISCONNECTED_STATE_PROPERTIES
   };
@@ -137,48 +135,20 @@ export class ContextGate extends React.PureComponent<{}, State> {
       });
   }
 
-  alertStoreCreate (alerts: Alert[]): AlertStore {
-    return {
-      alerts,
-      dequeue: () => this.alertStoreDequeue(),
-      enqueue: (newItem: Alert) => this.alertStoreEnqueue(newItem)
-    };
-  }
-
-  alertStoreDequeue = () => {
-    this.setState((state) => ({
-      ...state,
-      alertStore: this.alertStoreCreate(dequeue(state.alertStore.alerts))
-    }));
-  }
-
-  alertStoreEnqueue = (newItem: AlertWithoutId) => {
-    ++this.alertStoreCount;
-
-    this.setState((state) => ({
-      ...state,
-      alertStore: this.alertStoreCreate(enqueue(state.alertStore.alerts, {
-        ...newItem,
-        id: this.alertStoreCount
-      }))
-    }));
-  }
-
   render () {
     const { children } = this.props;
-    const { alertStore, isReady, system, txQueueStore } = this.state;
+    const { isReady, system, txQueueStore } = this.state;
 
-    console.log('txqueuestore in contextgate is',txQueueStore);
-
-    return <AppContext.Provider value={{
-      alertStore,
-      api: this.api,
-      isReady,
-      keyring,
-      system,
-      txQueueStore
-    }}>
-      {children}
-    </AppContext.Provider>;
+    return <AlertsContextProvider>
+      <AppContext.Provider value={{
+        api: this.api,
+        isReady,
+        keyring,
+        system,
+        txQueueStore
+      }}>
+        {children}
+      </AppContext.Provider>;
+    </AlertsContextProvider>
   }
 }
