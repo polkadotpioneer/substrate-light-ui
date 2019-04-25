@@ -3,21 +3,11 @@
 // of the Apache-2.0 license. See the LICENSE file for details.
 
 import { Alert } from '@substrate/ui-components';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Alert as AlertType, AlertsContext } from '@substrate/ui-common';
 
 export function Alerts() {
-  const {alerts, enqueue, remove} = useContext(AlertsContext);
-
-  useEffect(() => {
-    setTimeout(() => {
-      enqueue({
-        content: <p>hey</p>,
-        type: 'error'
-      });
-    }, 5000);
-  }, [enqueue]);
-
+  const {alerts, remove} = useContext(AlertsContext);
 
   return (
     <React.Fragment>

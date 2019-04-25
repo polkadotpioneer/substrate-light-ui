@@ -6,9 +6,9 @@ import accounts from '@polkadot/ui-keyring/observable/accounts';
 import addressObservable from '@polkadot/ui-keyring/observable/addresses';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Subscribe, AppContext } from '@substrate/ui-common';
+import { Subscribe, TxQueueContext } from '@substrate/ui-common';
 import { Container, Header } from '@substrate/ui-components';
-import React from 'react';
+import React, { useContext } from 'react';
 import { Redirect, Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { SendBalance } from './SendBalance';
@@ -20,12 +20,10 @@ interface MatchParams {
 
 interface Props extends RouteComponentProps<MatchParams> { }
 
-export class Transfer extends React.PureComponent<Props> {
-  static contextType = AppContext;
+export function Transfer(props: Props) {
 
-  context!: React.ContextType<typeof AppContext>; // http://bit.ly/typescript-and-react-context
+    const {txQueue} = useContext(TxQueueContext);
 
-  render() {
     return (
       <Container>
         <Header>Transfer Balance</Header>
@@ -50,7 +48,7 @@ export class Transfer extends React.PureComponent<Props> {
               }
             </Subscribe>
           )} />
-          {this.context.txQueueStore.txs.length
+          {txQueue.length
             ? <Route path='/transfer/:currentAccount/:recipientAddress' component={TxQueue} />
             : <Route path='/transfer/:currentAccount/:recipientAddress' component={SendBalance} />
           }

@@ -97,39 +97,7 @@ export class TxQueue extends React.PureComponent<Props, State> {
       </Segment>
     );
   }
-
-  renderSummary () {
-    const { match: { params: { currentAccount } } } = this.props;
-
-    const { amount, recipientAddress } = this.context.txQueueStore.txs[0];
-
-    return (
-      <StackedHorizontal>
-        <Margin as='span' left='small' right='small' top='small'>
-          <IdentityIcon theme='substrate' size={16} value={currentAccount} />
-        </Margin>
-        sent {amount.toString()} units to
-        <Margin as='span' left='small' right='small' top='small'>
-          <IdentityIcon theme='substrate' size={16} value={recipientAddress} />
-        </Margin>
-      </StackedHorizontal>
-    );
-  }
-
-  renderSuccess () {
-    const { match: { params: { currentAccount } } } = this.props;
-
-    return (
-      <Message.Content>
-        <StackedHorizontal justifyContent='space-around'>
-          <span>Transaction Completed!</span>
-          {this.renderSummary()}
-          <NavLink inverted to={`/transfer/${currentAccount}/sent`}>View transfer details</NavLink>
-        </StackedHorizontal>
-      </Message.Content>
-    );
-  }
-
+  
   renderTxStatus () {
     const { txResult } = this.state;
 
