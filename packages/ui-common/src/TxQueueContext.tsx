@@ -104,7 +104,7 @@ export function TxQueueContextProvider(props: Props) {
         isUsurped: false,
       },
       allFees, allTotal, amount, recipientAddress,
-      unsubscribe: subscription.unsubscribe
+      unsubscribe: () => subscription.unsubscribe()
     }
 
     setTxQueue(txQueue.concat(newPendingTx));
