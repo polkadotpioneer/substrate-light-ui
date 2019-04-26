@@ -22,38 +22,37 @@ interface Props extends RouteComponentProps<MatchParams> { }
 
 export function Transfer(props: Props) {
 
-    const {txQueue} = useContext(TxQueueContext);
+  const { txQueue } = useContext(TxQueueContext);
 
-    return (
-      <Container>
-        <Header>Transfer Balance</Header>
+  return (
+    <Container>
+      <Header>Transfer Balance</Header>
 
-        <Switch>
-          <Route exact path='/transfer/:currentAccount/' render={({ match: { params: { currentAccount } } }) => (
-            <Subscribe>
-              {
-                combineLatest(
-                  accounts.subject,
-                  addressObservable.subject
+      <Switch>
+        <Route exact path='/transfer/:currentAccount/' render={({ match: { params: { currentAccount } } }) => (
+          <Subscribe>
+            {
+              combineLatest(
+                accounts.subject,
+                addressObservable.subject
+              )
+                .pipe(
+                  map(([accounts, addresses]) => [
+                    ...Object.values(accounts).map(account => account.json.address),
+                    ...Object.values(addresses).map(address => address.json.address)]),
+                  map(addresses => addresses.filter(address => address !== currentAccount)),
+                  map(([firstDifferentAddress, ...rest]) => (
+                    <Redirect to={`/transfer/${currentAccount}/${firstDifferentAddress || currentAccount}`} />
+                  ))
                 )
-                  .pipe(
-                    map(([accounts, addresses]) => [
-                      ...Object.values(accounts).map(account => account.json.address),
-                      ...Object.values(addresses).map(address => address.json.address)]),
-                    map(addresses => addresses.filter(address => address !== currentAccount)),
-                    map(([firstDifferentAddress, ...rest]) => (
-                      <Redirect to={`/transfer/${currentAccount}/${firstDifferentAddress || currentAccount}`} />
-                    ))
-                  )
-              }
-            </Subscribe>
-          )} />
-          {txQueue.length
-            ? <Route path='/transfer/:currentAccount/:recipientAddress' component={TxQueue} />
-            : <Route path='/transfer/:currentAccount/:recipientAddress' component={SendBalance} />
-          }
-        </Switch>
-      </Container>
-    );
-  }
+            }
+          </Subscribe>
+        )} />
+        {txQueue.length
+          ? <Route path='/transfer/:currentAccount/:recipientAddress' component={TxQueue} />
+          : <Route path='/transfer/:currentAccount/:recipientAddress' component={SendBalance} />
+        }
+      </Switch>
+    </Container>
+  );
 }

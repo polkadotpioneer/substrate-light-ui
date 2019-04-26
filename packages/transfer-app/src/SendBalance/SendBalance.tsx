@@ -4,15 +4,14 @@
 
 import { DerivedBalances, DerivedFees } from '@polkadot/api-derive/types';
 import { Index } from '@polkadot/types';
-import { AppContext } from '@substrate/ui-common';
+import { AppContext, TxQueueContext } from '@substrate/ui-common';
 import { Balance, Form, Input, NavButton, StackedHorizontal, SubHeader } from '@substrate/ui-components';
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import { Observable, Subscription, zip } from 'rxjs';
+import { Observable, zip } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import { CenterDiv, InputAddress, LeftDiv, RightDiv } from '../Transfer.styles';
-import { SubResults } from './types';
 import { MatchParams } from '../types';
 import { validate } from './validate';
 import { Validation } from './Validation';
@@ -24,60 +23,42 @@ interface SendMatchParams extends MatchParams {
 
 interface Props extends RouteComponentProps<SendMatchParams> { }
 
-interface State extends Partial<SubResults> {
-  amountAsString: string;
-}
-
 const l = logger('transfer-app');
 
-export class SendBalance extends React.PureComponent<Props, State> {
-  static contextType = AppContext;
+export function SendBalance(props: Props) {
+  const { api, keyring } = useContext(AppContext);
+  const { submit } = useContext(TxQueueContext);
 
-  context!: React.ContextType<typeof AppContext>; // http://bit.ly/typescript-and-react-context
+  const { history, match: { params: { currentAccount, recipientAddress } } } = props;
 
-  state: State = {
-    amountAsString: ''
+  const [amountAsString, setAmountAsString] = useState('');
+  const [accountNonce, setAccountNonce] = useState();
+  const [currentBalance, setCurrentBalance] = useState();
+  const [fees, setFees] = useState();
+  const [recipientBalance, setRecipientBalance] = useState();
+
+  const values = validate({ amountAsString, accountNonce, currentBalance, fees, recipientBalance, currentAccount, recipientAddress }, api);
+
+  const changeCurrentAccount = (newCurrentAccount: string) => {
+    history.push(`/transfer/${newCurrentAccount}/${recipientAddress}`);
   };
 
-  subscription?: Subscription;
+  const changeRecipientAddress = (newRecipientAddress: string) => {
+    history.push(`/transfer/${currentAccount}/${newRecipientAddress}`);
+  }
 
-  componentDidMount () {
-    if (!this.props.match.params.recipientAddress) {
+  const handleChangeAmount = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
+    setAmountAsString(value);
+  };
+
+  // useEffect component did update
+  useEffect(() => {
+    if (!recipientAddress) {
       return;
     }
-    this.subscribeFees(this.props.match.params.currentAccount, this.props.match.params.recipientAddress);
-  }
-
-  componentDidUpdate (prevProps: Props) {
-    if (!this.props.match.params.recipientAddress) {
-      return;
-    }
-
-    if (
-      prevProps.match.params.currentAccount !== this.props.match.params.currentAccount ||
-      prevProps.match.params.recipientAddress !== this.props.match.params.recipientAddress
-    ) {
-      this.closeSubscription();
-      this.subscribeFees(this.props.match.params.currentAccount, this.props.match.params.recipientAddress);
-    }
-  }
-
-  componentWillUnmount () {
-    this.closeSubscription();
-  }
-
-  closeSubscription () {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
-
-  subscribeFees (currentAccount: string, recipientAddress: string) {
-    const { api } = this.context;
 
     // Subscribe to sender's & receivers's balances, nonce and some fees
-    this.subscription = zip(
+    const subscription = zip(
       api.derive.balances.fees() as unknown as Observable<DerivedFees>,
       api.derive.balances.votingBalance(currentAccount) as unknown as Observable<DerivedBalances>,
       api.derive.balances.votingBalance(recipientAddress) as unknown as Observable<DerivedBalances>,
@@ -86,110 +67,82 @@ export class SendBalance extends React.PureComponent<Props, State> {
       .pipe(
         take(1)
       )
-      .subscribe(([fees, currentBalance, recipientBalance, accountNonce]) => this.setState({
-        fees,
-        currentBalance,
-        recipientBalance,
-        accountNonce
-      }));
-  }
+      .subscribe(([fees, currentBalance, recipientBalance, accountNonce]) => {
+        setFees(fees);
+        setCurrentBalance(currentBalance);
+        setRecipientBalance(recipientBalance);
+        setAccountNonce(accountNonce);
+      });
+    return () => subscription.unsubscribe();
+  }, [currentAccount, recipientAddress])
 
-  handleChangeAmount = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({
-      amountAsString: value
-    });
-  }
-
-  handleChangeCurrentAccount = (account: string) => {
-    const { history, match: { params: { recipientAddress } } } = this.props;
-
-    history.push(`/transfer/${account}/${recipientAddress}`);
-  }
-
-  handleChangeRecipientAddress = (recipientAddress: string) => {
-    const { history, match: { params: { currentAccount } } } = this.props;
-
-    history.push(`/transfer/${currentAccount}/${recipientAddress}`);
-  }
-
-  handleSubmit = () => {
-    const { api, keyring, txQueueStore } = this.context;
-    const { match: { params: { currentAccount, recipientAddress } } } = this.props;
-
-    const values = validate({ ...this.state, currentAccount, recipientAddress }, api);
+  const handleSubmit = () => {
+    const values = validate({ amountAsString, accountNonce, currentBalance, fees, recipientBalance, currentAccount, recipientAddress }, api);
 
     values.fold(
       () => {/* Do nothing if error */ },
       (allExtrinsicData) => {
         // If everything is correct, then submit the extrinsic
 
-        const {extrinsic, amount, allFees, allTotal} = allExtrinsicData;
+        const { extrinsic, amount, allFees, allTotal } = allExtrinsicData;
 
         l.log('Sending tx from', currentAccount, 'to', recipientAddress, 'of amount', amount);
-        
+
         const senderPair = keyring.getPair(currentAccount);
-        txQueueStore.submit({ extrinsic, amount, allFees, allTotal, senderPair, recipientAddress: recipientAddress as any});
+        submit({ extrinsic, amount, allFees, allTotal, senderPair, recipientAddress: recipientAddress as any });
       });
   }
 
-  render () {
-    const { api } = this.context;
-    const { match: { params: { currentAccount, recipientAddress } } } = this.props;
-    const { amountAsString } = this.state;
+  return (
+    <Form onSubmit={handleSubmit}>
+      <StackedHorizontal alignItems='flex-start'>
+        <LeftDiv>
+          <SubHeader textAlign='left'>Sender Account:</SubHeader>
+          <InputAddress
+            isDisabled
+            onChange={changeCurrentAccount}
+            type='account'
+            value={currentAccount}
+            withLabel={false}
+          />
+          <Balance address={currentAccount} />
+        </LeftDiv>
 
-    const values = validate({ ...this.state, currentAccount, recipientAddress }, api);
+        <CenterDiv>
+          <SubHeader textAlign='left'>Amount:</SubHeader>
+          <Input
+            fluid
+            label='UNIT'
+            labelPosition='right'
+            min={0}
+            onChange={handleChangeAmount}
+            placeholder='e.g. 1.00'
+            type='number'
+            value={amountAsString}
+          />
+        </CenterDiv>
 
-    return (
-      <Form onSubmit={this.handleSubmit}>
-        <StackedHorizontal alignItems='flex-start'>
-          <LeftDiv>
-            <SubHeader textAlign='left'>Sender Account:</SubHeader>
-            <InputAddress
-              isDisabled
-              onChange={this.handleChangeCurrentAccount}
-              type='account'
-              value={currentAccount}
-              withLabel={false}
-            />
-            <Balance address={currentAccount} />
-          </LeftDiv>
-
-          <CenterDiv>
-            <SubHeader textAlign='left'>Amount:</SubHeader>
-            <Input
-              fluid
-              label='UNIT'
-              labelPosition='right'
-              min={0}
-              onChange={this.handleChangeAmount}
-              placeholder='e.g. 1.00'
-              type='number'
-              value={amountAsString}
-            />
-          </CenterDiv>
-
-          <RightDiv>
-            <SubHeader textAlign='left'>Recipient Address:</SubHeader>
-            <InputAddress
-              label={null}
-              onChange={this.handleChangeRecipientAddress}
-              type='all'
-              value={recipientAddress}
-              withLabel={false}
-            />
-            <Balance address={recipientAddress} />
-          </RightDiv>
-        </StackedHorizontal>
-        <StackedHorizontal>
-          <LeftDiv />
-          <CenterDiv>
-            <Validation values={values} />
-          </CenterDiv>
-          <RightDiv>
-            <NavButton disabled={values.isLeft()}>Submit</NavButton>
-          </RightDiv>
-        </StackedHorizontal>
-      </Form>
-    );
-  }
+        <RightDiv>
+          <SubHeader textAlign='left'>Recipient Address:</SubHeader>
+          <InputAddress
+            label={null}
+            onChange={changeRecipientAddress}
+            type='all'
+            value={recipientAddress}
+            withLabel={false}
+          />
+          <Balance address={recipientAddress} />
+        </RightDiv>
+      </StackedHorizontal>
+      <StackedHorizontal>
+        <LeftDiv />
+        <CenterDiv>
+          <Validation values={values} />
+        </CenterDiv>
+        <RightDiv>
+          <NavButton disabled={values.isLeft()}>Submit</NavButton>
+        </RightDiv>
+      </StackedHorizontal>
+    </Form>
+  );
 }

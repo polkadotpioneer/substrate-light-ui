@@ -2,8 +2,8 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { useContext, useEffect } from 'react';
-import { AlertsContext } from '@substrate/ui-common';
+import React, { useContext, useEffect } from 'react';
+import { AlertsContext, TxQueueContext } from '@substrate/ui-common';
 import { Message } from 'semantic-ui-react';
 import IdentityIcon from '@polkadot/ui-identicon';
 import { StackedHorizontal, Margin } from '@substrate/ui-components';
@@ -41,7 +41,7 @@ export function TxQueueNotifier() {
     });
 
     return subscription.unsubscribe();
-  }, [successObservable]);
+  }, [successObservable, enqueue]);
 
   // Display notification on error
   useEffect(() => {
@@ -62,7 +62,7 @@ export function TxQueueNotifier() {
     });
 
     return subscription.unsubscribe();
-  }, [errorObservable]);
+  }, [errorObservable, enqueue]);
 
   return null;
 };

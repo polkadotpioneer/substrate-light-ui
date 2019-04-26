@@ -21,7 +21,7 @@ export interface PendingTransaction { // aka TxQueueItem
   unsubscribe: any; // function
 } // partial? no, but with "?" keys
 
-interface SubmitParams {
+export interface SubmitParams {
   // todo consolidate with types.ts from SendBalance
   extrinsic: SubmittableExtrinsic<RxResult, RxResult>;
   allFees: BN;
@@ -49,12 +49,20 @@ const errorObservable = new Subject();
 export function TxQueueContextProvider(props: Props) {
 
   const [txQueue, setTxQueue]: [PendingTransaction[], any] = useState([] as PendingTransaction[]);
+
+  console.log('txQueue is', txQueue)
+
   const replaceTx = (id: number, newTx: PendingTransaction) => {
-    setTxQueue(txQueue.map((tx: PendingTransaction) => (
+    setTxQueue((prevTxQueue: PendingTransaction[]) => prevTxQueue.map((tx: PendingTransaction) => (
       tx.id === id
         ? newTx
         : tx
     )));
+  }
+
+  const closeTxSubscription = (id: number) => {
+    const tx = txQueue.find((tx) => tx.id === id);
+    if (tx) tx.unsubscribe();
   }
 
   const [txCounter, setTxCounter] = useState(0);
@@ -72,18 +80,16 @@ export function TxQueueContextProvider(props: Props) {
           // l.log(`Tx status update: ${txResult.status}`);
           const { status: { isFinalized, isDropped, isUsurped } } = txResult;
           replaceTx(transactionId, {
-            ...newPendingTx, ...{
-              status: { isFinalized, isDropped, isUsurped }
-            }
+            ...newPendingTx, status: { isFinalized, isDropped, isUsurped }
           });
 
           if (isFinalized) {
             successObservable.next({amount, recipientAddress, senderAddress: senderPair.address()});
           }
 
-          // if (isFinalized || isDropped || isUsurped) {
-          //   this.closeSubscription();
-          // }
+          if (isFinalized || isDropped || isUsurped) {
+            closeTxSubscription(transactionId);
+          }
         },
         (error: Error) => {
           errorObservable.next({ error: error.message });
