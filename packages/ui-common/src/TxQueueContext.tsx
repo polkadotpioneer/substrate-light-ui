@@ -32,13 +32,13 @@ export interface SubmitParams {
 }
 
 interface Props {
-  children: any
+  children: any;
 }
 
 export const TxQueueContext = createContext({
   txQueue: [] as PendingTransaction[],
-  submit: (params: SubmitParams) => {},
-  clear: () => {},
+  submit: (params: SubmitParams) => { console.error('TxQueueContext called without Provider.'); },
+  clear: () => { console.error('TxQueueContext called without Provider.'); },
   successObservable: new Subject(),
   errorObservable: new Subject()
 });
@@ -46,11 +46,11 @@ export const TxQueueContext = createContext({
 const successObservable = new Subject();
 const errorObservable = new Subject();
 
-export function TxQueueContextProvider(props: Props) {
+export function TxQueueContextProvider (props: Props) {
 
   const [txQueue, setTxQueue]: [PendingTransaction[], any] = useState([] as PendingTransaction[]);
 
-  console.log('txQueue is', txQueue)
+  console.log('txQueue is', txQueue);
 
   const replaceTx = (id: number, newTx: PendingTransaction) => {
     setTxQueue((prevTxQueue: PendingTransaction[]) => prevTxQueue.map((tx: PendingTransaction) => (
@@ -58,12 +58,12 @@ export function TxQueueContextProvider(props: Props) {
         ? newTx
         : tx
     )));
-  }
+  };
 
   const closeTxSubscription = (id: number) => {
     const tx = txQueue.find((tx) => tx.id === id);
     if (tx) tx.unsubscribe();
-  }
+  };
 
   const [txCounter, setTxCounter] = useState(0);
 
@@ -71,7 +71,7 @@ export function TxQueueContextProvider(props: Props) {
     const { extrinsic, senderPair, allFees, allTotal, amount, recipientAddress } = params;
 
     const transactionId = txCounter;
-    setTxCounter(txCounter+1);
+    setTxCounter(txCounter + 1);
 
     const subscription = extrinsic
       .signAndSend(senderPair) // send the extrinsic
@@ -84,7 +84,7 @@ export function TxQueueContextProvider(props: Props) {
           });
 
           if (isFinalized) {
-            successObservable.next({amount, recipientAddress, senderAddress: senderPair.address()});
+            successObservable.next({ amount, recipientAddress, senderAddress: senderPair.address() });
           }
 
           if (isFinalized || isDropped || isUsurped) {
@@ -101,17 +101,17 @@ export function TxQueueContextProvider(props: Props) {
       status: {
         isFinalized: false,
         isDropped: false,
-        isUsurped: false,
+        isUsurped: false
       },
       allFees, allTotal, amount, recipientAddress,
       unsubscribe: () => subscription.unsubscribe()
-    }
+    };
 
     setTxQueue(txQueue.concat(newPendingTx));
-  }
+  };
 
   const clear = () => {
-    txQueue.forEach(({ unsubscribe }) => { unsubscribe() });
+    txQueue.forEach(({ unsubscribe }) => { unsubscribe(); });
     setTxQueue([]);
   };
 

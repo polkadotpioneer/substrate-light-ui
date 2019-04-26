@@ -35,7 +35,7 @@ export class TxQueue extends React.PureComponent<Props, State> {
 
   toggleDetails = () => this.setState({ showDetails: !this.state.showDetails });
 
-  render() {
+  render () {
     const { txQueue } = this.context;
 
     // The parent component will redirect to SendBalance if empty txQueue
@@ -68,7 +68,7 @@ export class TxQueue extends React.PureComponent<Props, State> {
     );
   }
 
-  renderDetails() {
+  renderDetails () {
     const { match: { params: { currentAccount } } } = this.props;
 
     const { allFees, allTotal, amount, recipientAddress } = this.context.txQueue[0];
@@ -84,7 +84,7 @@ export class TxQueue extends React.PureComponent<Props, State> {
     );
   }
 
-  renderSummary() {
+  renderSummary () {
     const { match: { params: { currentAccount } } } = this.props;
 
     const { amount, recipientAddress } = this.context.txQueue[0];
@@ -102,7 +102,7 @@ export class TxQueue extends React.PureComponent<Props, State> {
     );
   }
 
-  renderTxStatus() {
+  renderTxStatus () {
     const { isFinalized, isDropped, isUsurped } = this.context.txQueue[0].status;
 
     if (isFinalized) {
@@ -110,14 +110,12 @@ export class TxQueue extends React.PureComponent<Props, State> {
         <SubHeader color='lightBlue1' >Transaction completed!</SubHeader>
         <Icon name='check' size='big' />
       </Stacked>;
-    }
-    else if (isDropped || isUsurped) {
+    } else if (isDropped || isUsurped) {
       return <Stacked>
         <SubHeader color='lightBlue1'>Transaction error!</SubHeader>
         <Icon error name='cross' size='big' />
       </Stacked>;
-    }
-    else {
+    } else {
       return <Stacked>
         <SubHeader color='lightBlue1'>Sending...</SubHeader>
         <Icon loading name='spinner' size='big' />

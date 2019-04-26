@@ -25,7 +25,7 @@ interface Props extends RouteComponentProps<SendMatchParams> { }
 
 const l = logger('transfer-app');
 
-export function SendBalance(props: Props) {
+export function SendBalance (props: Props) {
   const { api, keyring } = useContext(AppContext);
   const { submit } = useContext(TxQueueContext);
 
@@ -45,7 +45,7 @@ export function SendBalance(props: Props) {
 
   const changeRecipientAddress = (newRecipientAddress: string) => {
     history.push(`/transfer/${currentAccount}/${newRecipientAddress}`);
-  }
+  };
 
   const handleChangeAmount = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) => {
     setAmountAsString(value);
@@ -74,7 +74,7 @@ export function SendBalance(props: Props) {
         setAccountNonce(accountNonce);
       });
     return () => subscription.unsubscribe();
-  }, [currentAccount, recipientAddress])
+  }, [currentAccount, recipientAddress]);
 
   const handleSubmit = () => {
     const values = validate({ amountAsString, accountNonce, currentBalance, fees, recipientBalance, currentAccount, recipientAddress }, api);
@@ -91,7 +91,7 @@ export function SendBalance(props: Props) {
         const senderPair = keyring.getPair(currentAccount);
         submit({ extrinsic, amount, allFees, allTotal, senderPair, recipientAddress: recipientAddress as any });
       });
-  }
+  };
 
   return (
     <Form onSubmit={handleSubmit}>

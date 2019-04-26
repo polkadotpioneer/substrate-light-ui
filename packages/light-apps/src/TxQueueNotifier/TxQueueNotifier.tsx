@@ -8,7 +8,7 @@ import { Message } from 'semantic-ui-react';
 import IdentityIcon from '@polkadot/ui-identicon';
 import { StackedHorizontal, Margin } from '@substrate/ui-components';
 
-export function TxQueueNotifier() {
+export function TxQueueNotifier () {
   const { successObservable, errorObservable } = useContext(TxQueueContext);
   const { enqueue } = useContext(AlertsContext);
 
@@ -40,7 +40,7 @@ export function TxQueueNotifier() {
       });
     });
 
-    return subscription.unsubscribe();
+    return () => subscription.unsubscribe();
   }, [successObservable, enqueue]);
 
   // Display notification on error
@@ -65,4 +65,4 @@ export function TxQueueNotifier() {
   }, [errorObservable, enqueue]);
 
   return null;
-};
+}

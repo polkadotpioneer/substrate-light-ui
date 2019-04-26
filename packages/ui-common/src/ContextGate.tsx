@@ -143,11 +143,11 @@ export class ContextGate extends React.PureComponent<{}, State> {
         api: this.api,
         isReady,
         keyring,
-        system,
+        system
       }}>
         {children}
       </AppContext.Provider>
       </TxQueueContextProvider>
-    </AlertsContextProvider>
+    </AlertsContextProvider>;
   }
 }

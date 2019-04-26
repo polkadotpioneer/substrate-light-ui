@@ -2,12 +2,12 @@
 // This software may be modified and distributed under the terms
 // of the Apache-2.0 license. See the LICENSE file for details.
 
-import { Alert } from '@substrate/ui-components';
 import React, { useContext } from 'react';
+import { Alert } from '@substrate/ui-components';
 import { Alert as AlertType, AlertsContext } from '@substrate/ui-common';
 
-export function Alerts() {
-  const {alerts, remove} = useContext(AlertsContext);
+export function Alerts () {
+  const { alerts, remove } = useContext(AlertsContext);
 
   return (
     <React.Fragment>
@@ -25,4 +25,4 @@ export function Alerts() {
       ))}
     </React.Fragment>
   );
-};
+}

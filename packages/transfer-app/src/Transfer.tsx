@@ -20,7 +20,7 @@ interface MatchParams {
 
 interface Props extends RouteComponentProps<MatchParams> { }
 
-export function Transfer(props: Props) {
+export function Transfer (props: Props) {
 
   const { txQueue } = useContext(TxQueueContext);
 

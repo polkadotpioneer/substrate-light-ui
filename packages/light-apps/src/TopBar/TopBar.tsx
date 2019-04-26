@@ -14,7 +14,7 @@ import { Link, Route, Switch } from 'react-router-dom';
 
 interface Props {}
 
-export function TopBar(props: Props) {
+export function TopBar (props: Props) {
   const { api, system: { chain, health, name, version } } = useContext(AppContext);
 
   const isSyncing = health.isSyncing;
@@ -26,7 +26,7 @@ export function TopBar(props: Props) {
 
     return () => {
       chainHeadSub.unsubscribe();
-    }
+    };
   }, [api, setBlockNumber]);
 
   return (

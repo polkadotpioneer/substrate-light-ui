@@ -10,9 +10,9 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { InputAddress } from './IdentityHeader.styles';
 
-interface Props extends RouteComponentProps { } 
+interface Props extends RouteComponentProps { }
 
-export function IdentityHeader(props: Props) {
+export function IdentityHeader (props: Props) {
   const { history } = props;
   const { keyring } = useContext(AppContext);
   const { enqueue } = useContext(AlertsContext);
@@ -26,23 +26,23 @@ export function IdentityHeader(props: Props) {
       content: value,
       type: 'success'
     });
-  }
+  };
   const notifySuccess = (value: any) => {
     enqueue({
       content: value,
       type: 'error'
     });
-  }
+  };
 
   // Change account
   const changeCurrentAccount = (account: string) => {
     history.push(`/transfer/${account}`);
-  }
+  };
 
   // Rename modal
   const [renameModalOpen, setRenameModalOpen] = useState(false);
   const openRenameModal = () => setRenameModalOpen(true);
-  const closeRenameModal = () => { setRenameModalOpen(false); setInputName(name) };
+  const closeRenameModal = () => { setRenameModalOpen(false); setInputName(name); };
   const [inputName, setInputName] = useState(name);
   const onChangeInputName = ({ target: { value } }: React.ChangeEvent<HTMLInputElement>) =>
     setInputName(value);
@@ -52,7 +52,7 @@ export function IdentityHeader(props: Props) {
     setName(inputName);
     closeRenameModal();
     notifySuccess('Successfully renamed account!');
-  }
+  };
 
   // Backup modal
   const [backupModalOpen, setBackupModalOpen] = useState(false);
@@ -75,7 +75,7 @@ export function IdentityHeader(props: Props) {
       closeBackupModal();
       notifyError(e.message);
     }
-  }
+  };
 
   // Forget modal
   const [forgetModalOpen, setForgetModalOpen] = useState(false);
@@ -92,7 +92,7 @@ export function IdentityHeader(props: Props) {
     } catch (e) {
       notifyError(e.message);
     }
-  }
+  };
 
   return (
     <Menu>
